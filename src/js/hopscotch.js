@@ -1,3 +1,19 @@
+/**! hopscotch - v0.2.5
+*
+* Copyright 2015 LinkedIn Corp. All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 (function(context, factory) {
   'use strict';
 
@@ -1386,7 +1402,7 @@
      * @private
      */
     targetClickNextFn = function() {
-      self.nextStep();
+	  self.nextStep();
     },
 
     /**
@@ -1594,6 +1610,12 @@
         utils.removeEvtListener(utils.getStepTarget(step), 'click', targetClickNextFn);
       }
 
+	  // added by azg
+      if (step.nextOn) {
+        // Detach the listener when tour is moving to a different step
+        utils.removeEvtListener(utils.getStepTarget(step), step.nextOn, targetClickNextFn);
+      }
+
       origStep = step;
       if (direction > 0) {
         wasMultiPage = origStep.multipage;
@@ -1772,6 +1794,12 @@
         utils.removeEvtListener(utils.getStepTarget(getCurrStep()), 'click', targetClickNextFn);
       }
 
+	  // azg
+      if (currStepNum !== stepNum && getCurrStep().nextOn) {
+        // Detach the listener when tour is moving to a different step
+        utils.removeEvtListener(utils.getStepTarget(getCurrStep()), getCurrStep().nextOn, targetClickNextFn);
+      }
+
       // Update bubble for current step
       currStepNum = stepNum;
 
@@ -1789,6 +1817,11 @@
         // If we want to advance to next step when user clicks on target.
         if (step.nextOnTargetClick) {
           utils.addEvtListener(targetEl, 'click', targetClickNextFn);
+        }
+		
+        // azg - If we want to advance to next step when user clicks on target.
+        if (step.nextOn) {
+          utils.addEvtListener(targetEl, step.nextOn, targetClickNextFn);
         }
       });
 
@@ -2005,6 +2038,11 @@
         currentStep = getCurrStep();
         if(currentStep && currentStep.nextOnTargetClick) {
           utils.removeEvtListener(utils.getStepTarget(currentStep), 'click', targetClickNextFn);
+        }
+		
+		// azg
+        if(currentStep && currentStep.nextOn) {
+          utils.removeEvtListener(utils.getStepTarget(currentStep), currentStep.nextOn, targetClickNextFn);
         }
       }
 
@@ -2429,8 +2467,90 @@
 // Template includes, placed inside a closure to ensure we don't
 // end up declaring our shim globally.
 (function(){
-// @@include('../../src/tl/_template_headers.js') //
-// @@include('../../tmp/js/hopscotch_templates.js') //
+var _ = {};
+/*
+ * Adapted from the Underscore.js framework. Check it out at
+ * https://github.com/jashkenas/underscore
+ */
+_.escape = function(str){
+  if(customEscape){ return customEscape(str); }
+  
+  if(str == null) return '';
+  return ('' + str).replace(new RegExp('[&<>"\']', 'g'), function(match){
+    if(match == '&'){ return '&amp;' }
+    if(match == '<'){ return '&lt;' }
+    if(match == '>'){ return '&gt;' }
+    if(match == '"'){ return '&quot;' }
+    if(match == "'"){ return '&#x27;' }
+  });
+}
+this["templates"] = this["templates"] || {};
+
+this["templates"]["bubble_default"] = function(obj) {
+obj || (obj = {});
+var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
+function print() { __p += __j.call(arguments, '') }
+with (obj) {
+
+
+  function optEscape(str, unsafe){
+    if(unsafe){
+      return _.escape(str);
+    }
+    return str;
+  }
+;
+__p += '\n<div class="hopscotch-bubble-container" style="width: ' +
+((__t = ( step.width )) == null ? '' : __t) +
+'px; padding: ' +
+((__t = ( step.padding )) == null ? '' : __t) +
+'px;">\n  ';
+ if(tour.isTour){ ;
+__p += '<span class="hopscotch-bubble-number">' +
+((__t = ( i18n.stepNum )) == null ? '' : __t) +
+'</span>';
+ } ;
+__p += '\n  <div class="hopscotch-bubble-content">\n    ';
+ if(step.title !== ''){ ;
+__p += '<h3 class="hopscotch-title">' +
+((__t = ( optEscape(step.title, tour.unsafe) )) == null ? '' : __t) +
+'</h3>';
+ } ;
+__p += '\n    ';
+ if(step.content  !== ''){ ;
+__p += '<div class="hopscotch-content">' +
+((__t = ( optEscape(step.content, tour.unsafe) )) == null ? '' : __t) +
+'</div>';
+ } ;
+__p += '\n  </div>\n  <div class="hopscotch-actions">\n    ';
+ if(buttons.showPrev){ ;
+__p += '<button class="hopscotch-nav-button prev hopscotch-prev">' +
+((__t = ( i18n.prevBtn )) == null ? '' : __t) +
+'</button>';
+ } ;
+__p += '\n    ';
+ if(buttons.showCTA){ ;
+__p += '<button class="hopscotch-nav-button next hopscotch-cta">' +
+((__t = ( buttons.ctaLabel )) == null ? '' : __t) +
+'</button>';
+ } ;
+__p += '\n    ';
+ if(buttons.showNext){ ;
+__p += '<button class="hopscotch-nav-button next hopscotch-next">' +
+((__t = ( i18n.nextBtn )) == null ? '' : __t) +
+'</button>';
+ } ;
+__p += '\n  </div>\n  ';
+ if(buttons.showClose){ ;
+__p += '<button class="hopscotch-bubble-close hopscotch-close">' +
+((__t = ( i18n.closeTooltip )) == null ? '' : __t) +
+'</button>';
+ } ;
+__p += '\n</div>\n<div class="hopscotch-bubble-arrow-container hopscotch-arrow">\n  <div class="hopscotch-bubble-arrow-border"></div>\n  <div class="hopscotch-bubble-arrow"></div>\n</div>';
+
+}
+return __p
+};
 }.call(winHopscotch));
 
   return winHopscotch;
